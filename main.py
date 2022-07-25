@@ -1,5 +1,5 @@
 import numpy as np
-from tablero import tablero
+from board import board
 #Variable global para almacenar y tratar el ambiente del juego
 environment=np.array([  [0,0,0,0,0,0,0,0],
                         [0,0,0,0,0,0,0,0],
@@ -10,8 +10,8 @@ environment=np.array([  [0,0,0,0,0,0,0,0],
                         [0,0,0,0,0,0,0,0],
                         [0,0,0,0,0,0,0,0]])
 
-tableroPrueba = tablero()
-print(tableroPrueba)
+tablero = board()
+print(tablero)
 
 #Variables globales para llevar el conteo del puntaje de los jugadores, blanco=cpu y negro=humano
 blackHorseScore=0
