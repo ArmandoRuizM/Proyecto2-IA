@@ -9,8 +9,8 @@ enviroment = np.array([ [0,0,0,0,0,0,0,0],
                         [0,0,0,0,0,0,0,0],
                         [0,0,0,0,0,0,0,0],
                         [0,0,0,0,0,0,0,0]])
-# Arreglo para almacenar el número total de items, donde items[1] la cantidad de césped, 
-# items[2] la cantidad de flores e items[3] la cantidad de manzanas                     
+# Arreglo para almacenar el número total de items, donde items[0] la cantidad de césped, 
+# items[1] la cantidad de flores e items[2] la cantidad de manzanas                     
 items = [14, 5, 2]
 #Función que determina las posiciones de los items. 
 def itemPosition(objetos, cantidad, item): #Recibe el contador de los objetos, la cantidad establecida que debe tener el objeto dentro del mapa y el número asociado a ese objeto.
