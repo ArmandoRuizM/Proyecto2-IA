@@ -1,6 +1,7 @@
-from inspect import stack
 import numpy as np
 from board import board
+from stack import Stack
+from node import Node
 
 # environment=np.array([[0,0,0,3,0,4,0,0],
 #                     [0,3,0,4,0,3,0,0],
@@ -11,87 +12,7 @@ from board import board
 #                     [0,4,3,0,0,5,0,0],
 #                     [0,3,0,0,0,0,3,0]])
 # print(environment)
-
-#Clase Pila, usada para la implementación del arbol minimax
-class Stack: 
-    def __init__(self): 
-        self.elements = [] 
-        
-    def push(self, data): 
-        self.elements.append(data) 
-        return data 
-    
-    def pop(self): 
-        return self.elements.pop() 
-        
-    def peek(self): 
-        return self.elements[-1] 
-        
-    def is_empty(self): 
-        return len(self.elements) == 0
-
-    def showStack(self):
-        print(self.elements)
-
-#Se define la clase Node, usada para implementar el algoritmo minimax
-class Node:
-  #Se define el método constructor
-  def __init__(self, status, parent, player, depth, utility):
-    self.status = status
-    self.parent = parent
-    if(player==1):
-        self.type="MIN"
-    else:
-        self.type="MAX"
-    
-    self.depth = depth
-    if(player==1):
-        self.utility=999999
-    else:
-        self.utility=-999999
-    self.expanded=False
-
-  #Método bobo
-  def ImNode(self):
-    return "Hola, soy un nodo"
-
-
-#Getter del estado del nodo
-  def getStatus(self):
-    return self.status
-
-    #Getter del padre del nodo
-  def getParent(self):
-    return self.parent
-
-    #Getter del tipo del nodo
-  def getType(self):
-    return self.type
-
-  #Getter de la profundidad del nodo
-  def getDepth(self):
-    return self.depth
-
-    #Getter de la utilidad del nodo
-  def getUtility(self):
-    return self.utility
-
-    #Getter de la expansión del nodo
-  def getExpanded(self):
-    return self.expanded
-    
-    #Setter de la expansión del nodo
-  def setExpanded(self, bool):
-    self.expanded=bool
-    return bool
-
-    #Setter de la utilidad del nodo
-  def setUtility(self, uti):
-    self.utility=uti
-    return uti
-
-
-     
+ 
 #Función que genera el estado inicial del juego, el cual llevará el nodo raíz
 #El estado está representado así:
 #[ambienteActual, puntosHumano, puntosCPU]
