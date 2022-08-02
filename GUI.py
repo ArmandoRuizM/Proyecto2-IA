@@ -1,18 +1,19 @@
-# pygame.quit()
 import pygame, sys
 import numpy as np
-# Setup pygame/window ---------------------------------------- #
-mainClock = pygame.time.Clock()
+from board import board
 from pygame.locals import *
+from main import possibleMoves, findPlayer, initStatus, movePlayer
+
+mainClock = pygame.time.Clock()
 pygame.init()
 pygame.display.set_caption('Hungry horses 1.0')
 screen = pygame.display.set_mode((800, 800),0,32)
- 
 font = pygame.font.SysFont(None, 100)
-
 apple=pygame.image.load("src/apple.png")
 grass=pygame.image.load("src/grass.png")
 rose=pygame.image.load("src/rose.png")
+player=pygame.image.load("src/player.png")
+cpu=pygame.image.load("src/cpu.png")
 
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
@@ -22,21 +23,39 @@ def draw_text(text, font, color, surface, x, y):
  
 click = False
  
-def drawBoard(board, environment, ancho, alto, BLANCO, NEGRO):
-    color = 0
+def getPossibleMove(posMoves,env):
+    playerPos=findPlayer(1,env)
+    moves=[]
+    if posMoves[0]:
+        moves.append([0,[playerPos[0]-1,playerPos[1]-2]])
+    if posMoves[1]:
+        moves.append([1, [playerPos[0]-2,playerPos[1]-1]])
+    if posMoves[2]:
+        moves.append([2, [playerPos[0]-1,playerPos[1]+2]])
+    if posMoves[3]:
+        moves.append([3, [playerPos[0]-2,playerPos[1]+1]])
+    if posMoves[4]:
+        moves.append([4, [playerPos[0]+1,playerPos[1]+2]])
+    if posMoves[5]:
+        moves.append([5, [playerPos[0]+2,playerPos[1]+1]])
+    if posMoves[6]:
+        moves.append([6, [playerPos[0]+1,playerPos[1]-2]])
+    if posMoves[7]:
+        moves.append([7, [playerPos[0]+2,playerPos[1]-1]])
+    return moves
+
+
+def drawObjects(environment, ancho, alto):
     n=0
+    color=0
     for i in range(0, 800, ancho):
         m=0
         for j in range(0, 800, alto):
-            print("Valor de n: "+str(n))
-            print("Valor de m: "+str(m))
             if color % 2 == 0:
-                board[n].append(pygame.Rect(i, j, ancho, alto))
-                pygame.draw.rect(screen, NEGRO, [i, j, ancho, alto], 0)
                 if(environment[m][n]==1):
-                    print("HOLA")
+                    screen.blit(player, [i+15, j+15])
                 elif (environment[m][n]==2):
-                    print("HOLA")
+                    screen.blit(cpu, [i+15, j+15])
                 elif (environment[m][n]==3):
                     screen.blit(grass, [i+15, j+15])
                 elif (environment[m][n]==4):
@@ -44,12 +63,10 @@ def drawBoard(board, environment, ancho, alto, BLANCO, NEGRO):
                 elif (environment[m][n]==5):
                     screen.blit(apple, [i+15, j+15])
             else:
-                board[n].append(pygame.Rect(i, j, ancho, alto))
-                pygame.draw.rect(screen, BLANCO, [i, j, ancho, alto], 0)
                 if(environment[m][n]==1):
-                    print("HOLA")
+                    screen.blit(player, [i+15, j+15])
                 elif (environment[m][n]==2):
-                    print("HOLA")
+                    screen.blit(cpu, [i+15, j+15])
                 elif (environment[m][n]==3):
                     screen.blit(grass, [i+15, j+15])
                 elif (environment[m][n]==4):
@@ -60,8 +77,69 @@ def drawBoard(board, environment, ancho, alto, BLANCO, NEGRO):
             m=m+1
         color += 1
         n=n+1
+
+def drawPossibleMoves(moves, environment):
+    listeners=[]
+    for i in range(len(moves)):
+        listeners.append([moves[i][0], pygame.Rect(moves[i][1][1]*100, moves[i][1][0]*100, 100, 100)])
+        pygame.draw.rect(screen, (255, 255, 102), [moves[i][1][1]*100, moves[i][1][0]*100, 100, 100], 0)
+    return listeners
+
+def drawBoard(board, environment, ancho, alto, BLANCO, NEGRO, CAFE, pp1, pcpu):
+    color = 0
+    n=0
+    screen.fill(CAFE)
+    p1PossibleMoves=possibleMoves(1,environment)
+    moves = getPossibleMove(p1PossibleMoves, environment)
+    for i in range(0, 800, ancho):
+        m=0
+        for j in range(0, 800, alto):
+            if color % 2 == 0:
+                #board[n].append(pygame.Rect(i, j, ancho, alto))
+                pygame.draw.rect(screen, NEGRO, [i, j, ancho, alto], 0)
+            else:
+                #board[n].append(pygame.Rect(i, j, ancho, alto))
+                pygame.draw.rect(screen, BLANCO, [i, j, ancho, alto], 0)
+            color += 1
+            m=m+1
+        color += 1
+        n=n+1
+    listeners=drawPossibleMoves(moves,environment)
+    drawObjects(environment, ancho, alto)
+    font = pygame.font.SysFont(None, 40)
+    draw_text('Puntos CPU:', font, (255, 255, 255), screen, 80, 840)
+    draw_text(str(pcpu), font, (255, 255, 255), screen, 265, 840)
+    draw_text('Sus puntos:', font, (255, 255, 255), screen, 530, 840)
+    draw_text(str(pp1), font, (255, 255, 255), screen, 710, 840)
     pygame.display.flip()
-    return board
+    return listeners
+
+def isThereAWinner(status):
+    objects=0
+    for i in range(len(status[0])):
+        for j in range(len(status[0][i])):
+            if(status[0][i][j]==3):
+                objects+=1
+            elif(status[0][i][j]==4):
+                objects+=1
+            elif(status[0][i][j]==5):
+                objects+=1
+    if objects==0:
+        return True
+    else:
+        return False
+    
+def whoWins(status):
+    winner="CR7"
+    if status[1]>status[2]:
+        winner="Usted"
+    elif status[2]>status[1]:
+        winner="CPU"
+    else:
+        winner="Nadie, fue un empate"
+    return winner
+    
+
 
 def main_menu():
     while True:
@@ -109,54 +187,52 @@ def main_menu():
  
 def game():
     running = True
+    screen = pygame.display.set_mode((800, 900),0,32)
+    NEGRO = (0, 230, 230)
+    BLANCO = (179, 255, 255)
+    CAFE = (153, 77, 0)
+    ancho = int(100)
+    alto = int(100)
+    gameBoard= [[],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [],
+                []]
+    status=initStatus()
+    currentPlayer="CPU"
     while running:
 
-        screen = pygame.display.set_mode((800, 900),0,32)
+        listeners=drawBoard(gameBoard, status[0], ancho, alto, BLANCO, NEGRO, CAFE, status[1], status[2])
 
-        NEGRO = (0, 230, 230)
-        BLANCO = (179, 255, 255)
-        CAFE = (153, 77, 0)
-        reloj = pygame.time.Clock()
-        ancho = int(100)
-        alto = int(100)
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            screen.fill(CAFE)
-
-            env = [[0,0,0,3,0,4,2,3],
-                    [0,3,0,4,0,3,0,0],
-                    [3,1,0,0,0,0,0,0],
-                    [0,3,0,0,5,0,0,4],
-                    [3,0,0,0,3,0,3,0],
-                    [3,0,0,0,4,0,0,3],
-                    [0,4,3,0,0,5,0,0],
-                    [0,3,0,0,0,0,3,0]]
-    
-            board = [[],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    []]
-            drawBoard(board, env, ancho, alto, BLANCO, NEGRO)
-            reloj.tick(5)
-
-
-        # screen.fill((0,0,0))
-        
-        # draw_text('game', font, (255, 255, 255), screen, 20, 20)
-        # for event in pygame.event.get():
-        #     if event.type == QUIT:
-        #         pygame.quit()
-        #         sys.exit()
-        #     if event.type == KEYDOWN:
-        #         if event.key == K_ESCAPE:
-        #             running = False
-        
+        if currentPlayer=="CPU": ##Juega la CPU
+            posMovCPU = possibleMoves(2,status[0])
+            nextMove = -1
+            for i in range(len(posMovCPU)):
+                if posMovCPU[i]:
+                    nextMove=i
+                    break
+            status=movePlayer(2, nextMove, status)
+            currentPlayer="P1"
+        else: ##Juega player1
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if evento.type == pygame.MOUSEBUTTONUP:
+                    pos = pygame.mouse.get_pos()
+                    # get a list of all sprites that are under the mouse cursor
+                    clicked_listeners = [s for s in listeners if s[1].collidepoint(pos)]
+                    # do something with the clicked sprites...
+                    for i in range(len(clicked_listeners)):
+                        status=movePlayer(1 , clicked_listeners[i][0], status)
+                        currentPlayer="CPU"
+        if(isThereAWinner(status)):
+            print("Terminó la partida, el ganador es: "+ whoWins(status))
+            pygame.quit()
+            sys.exit()
         pygame.display.update()
         mainClock.tick(60)
  
