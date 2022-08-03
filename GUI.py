@@ -139,28 +139,50 @@ def whoWins(status):
         winner="Nadie, fue un empate"
     return winner
     
-
+def game_over(status):
+    while True:
+        screen.fill((255,255,255))
+        draw_text('Game Over', pygame.font.SysFont(None, 110), (0, 0, 0), screen, 200, 150)
+        mx, my = pygame.mouse.get_pos()
+        draw_text("Terminó la partida, el ganador es: "+ whoWins(status), pygame.font.SysFont(None, 50), (0, 0, 0), screen, 50, 480)
+        button_3 = pygame.Rect(350, 610, 100, 60)
+        if button_3.collidepoint((mx, my)):
+            if click:
+                pygame.quit()
+                sys.exit()
+        font = pygame.font.SysFont(None, 40)
+        pygame.draw.rect(screen, (255, 255, 255), button_3)
+        draw_text('Salir', font, (255, 0, 0), screen, 350, 630)
+ 
+        click = False
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+ 
+        pygame.display.update()
+        mainClock.tick(60)
 
 def main_menu():
     while True:
- 
         screen.fill((255,255,255))
         draw_text('Hungry horses 1.0', pygame.font.SysFont(None, 110), (0, 0, 0), screen, 90, 150)
-
         mx, my = pygame.mouse.get_pos()
- 
         button_1 = pygame.Rect(260, 330, 260, 80)
         button_2 = pygame.Rect(280, 480, 200, 80)
         button_3 = pygame.Rect(270, 630, 220, 80)
         if button_1.collidepoint((mx, my)):
             if click:
-                game()
+                game(2)
         if button_2.collidepoint((mx, my)):
             if click:
-                game()
+                game(4)
         if button_3.collidepoint((mx, my)):
             if click:
-                game()
+                game(6)
         font = pygame.font.SysFont(None, 60)
         pygame.draw.rect(screen, (255, 255, 255), button_1)
         draw_text('Principiante', font, (0, 0, 0), screen, 265, 350)
@@ -168,7 +190,6 @@ def main_menu():
         draw_text('Amateur', font, (0, 0, 0), screen, 285, 500)
         pygame.draw.rect(screen, (255, 255, 255), button_3)
         draw_text('Avanzado', font, (0, 0, 0), screen, 275, 650)
- 
         click = False
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -181,11 +202,11 @@ def main_menu():
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click = True
- 
         pygame.display.update()
         mainClock.tick(60)
  
-def game():
+def game(difficulty):
+    diff=difficulty
     running = True
     screen = pygame.display.set_mode((800, 900),0,32)
     NEGRO = (0, 230, 230)
@@ -230,10 +251,8 @@ def game():
                         status=movePlayer(1 , clicked_listeners[i][0], status)
                         currentPlayer="CPU"
         if(isThereAWinner(status)):
-            print("Terminó la partida, el ganador es: "+ whoWins(status))
-            pygame.quit()
-            sys.exit()
+            running=False
+            game_over(status)
         pygame.display.update()
         mainClock.tick(60)
- 
 main_menu()
