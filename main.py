@@ -226,10 +226,8 @@ def createTree(depth):
             break
     return minmaxTree
 
-prueba=createTree(2)
-for n in range(len(prueba.elements)):
-    print(prueba.elements[n].getStatus()[2], prueba.elements[n].getUtility())
-print(len(prueba.elements))
+# prueba=createTree(2)
+# print(len(prueba.elements))
 # print(prueba.peek().getUtility())
 # auxStatus=[environment,0,0]
 # print(movePlayer(1, 0, auxStatus))
