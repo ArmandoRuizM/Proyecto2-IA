@@ -1,3 +1,4 @@
+import re
 import numpy as np
 from board import board
 from stack import Stack
@@ -172,12 +173,31 @@ def expandNode(node):
             children[i]=Node(movePlayer(actualPlayer, i, newStatus), node, nextPlayer, node.getDepth()+1, "xd")
     return children
 
+#Funcion para calcular la utilidad
 def deepestNodeUtility(stack, depth):
     for i in range (len(stack.elements)):
         if stack.elements[i].getDepth()==depth:
-            print("El nodo a verificar tiene profundidad: "+str(stack.elements[i].getDepth()))
-            stack.elements[i].setUtility(stack.elements[i].getStatus()[2] - stack.elements[i].getStatus()[1])
+            #print("El nodo a verificar tiene profundidad: "+str(stack.elements[i].getDepth()))
+            stack.elements[i].setUtility(stack.elements[i].getStatus()[2])
     return stack
+
+#Funcion para ver si un nodo es meta
+def goalNode(node):
+    aux_board = node.getStatus()[0]
+    objCounter = 0
+    goal = False
+    for i in range(len(aux_board)):
+        for j in range(len(aux_board[i])):
+            if(aux_board[i][j]==3 or  aux_board[i][j]==4 or aux_board[i][j]==5):
+                objCounter+=1
+    if(objCounter>=1):
+        goal = False
+    else:
+        goal = True
+
+    return goal
+
+
 
 def createTree(depth):
     actualDepth=0
@@ -202,11 +222,13 @@ def createTree(depth):
                 minmaxTree.elements[i].setExpanded(True)
         #print("Nodos de profundidad "+ str(actualDepth)+": "+str(counter))
         if(actualDepth==depth):
-            #minmaxTree=deepestNodeUtility(minmaxTree, depth)
+            minmaxTree=deepestNodeUtility(minmaxTree, depth)
             break
     return minmaxTree
 
 prueba=createTree(2)
+for n in range(len(prueba.elements)):
+    print(prueba.elements[n].getStatus()[2], prueba.elements[n].getUtility())
 print(len(prueba.elements))
 # print(prueba.peek().getUtility())
 # auxStatus=[environment,0,0]
