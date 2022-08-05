@@ -1,7 +1,7 @@
 #Se define la clase Node, usada para implementar el algoritmo minimax
 class Node:
   #Se define el método constructor
-  def __init__(self, status, parent, player, depth, utility):
+  def __init__(self, status, parent, player, depth, utility, operator):
     self.status = status
     self.parent = parent
     if(player==1):
@@ -15,6 +15,7 @@ class Node:
     else:
         self.utility=-999999
     self.expanded=False
+    self.operator = operator
 
   #Método bobo
   def ImNode(self):
@@ -41,6 +42,10 @@ class Node:
   def getUtility(self):
     return self.utility
 
+  #Getter de la utilidad del nodo
+  def getOperator(self):
+    return self.operator
+
     #Getter de la expansión del nodo
   def getExpanded(self):
     return self.expanded
@@ -54,3 +59,8 @@ class Node:
   def setUtility(self, uti):
     self.utility=uti
     return uti
+
+    #Setter de la utilidad del nodo
+  def setOperator(self, op):
+    self.operator=op
+    return op

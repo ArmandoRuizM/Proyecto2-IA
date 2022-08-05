@@ -1,9 +1,11 @@
+from re import U
 import pygame, sys
 import numpy as np
 from board import board
 from pygame.locals import *
-from main import possibleMoves, findPlayer, initStatus, movePlayer
-
+from main import possibleMoves, findPlayer, initStatus, movePlayer, createTree, utility
+from node import Node
+import time
 mainClock = pygame.time.Clock()
 pygame.init()
 pygame.display.set_caption('Hungry horses 1.0')
@@ -214,6 +216,7 @@ def game(difficulty):
     CAFE = (153, 77, 0)
     ancho = int(100)
     alto = int(100)
+    tree=createTree(diff, Node(initStatus(), None, 2, 0, "xd", -1))
     gameBoard= [[],
                 [],
                 [],
@@ -222,20 +225,16 @@ def game(difficulty):
                 [],
                 [],
                 []]
-    status=initStatus()
+    status=tree.elements[0].getStatus()
     currentPlayer="CPU"
     while running:
-
         listeners=drawBoard(gameBoard, status[0], ancho, alto, BLANCO, NEGRO, CAFE, status[1], status[2])
-
         if currentPlayer=="CPU": ##Juega la CPU
-            posMovCPU = possibleMoves(2,status[0])
-            nextMove = -1
-            for i in range(len(posMovCPU)):
-                if posMovCPU[i]:
-                    nextMove=i
-                    break
+            #time.sleep(3)
+            tree=utility(tree)
+            nextMove = tree.elements[0].getOperator()
             status=movePlayer(2, nextMove, status)
+            tree=createTree(diff, Node(movePlayer(2, nextMove, tree.elements[0].getStatus()), None, 2, 0, "xd", -1))
             currentPlayer="P1"
         else: ##Juega player1
             for evento in pygame.event.get():
@@ -249,6 +248,7 @@ def game(difficulty):
                     # do something with the clicked sprites...
                     for i in range(len(clicked_listeners)):
                         status=movePlayer(1 , clicked_listeners[i][0], status)
+                        tree=createTree(diff, Node(status, None, 2, 0, "xd", -1))
                         currentPlayer="CPU"
         if(isThereAWinner(status)):
             running=False
