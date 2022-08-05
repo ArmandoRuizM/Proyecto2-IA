@@ -18,3 +18,6 @@ class Stack:
 
     def showStack(self):
         print(self.elements)
+
+    def length(self):
+        return len(self.elements)

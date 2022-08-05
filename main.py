@@ -197,18 +197,27 @@ def goalNode(node):
 
     return goal
 
-
+def utility(stack):
+    for i in range(depth):
+        for j in range(len(stack.elements)):
+            depth = stack.getDepth()
+            if stack.elements[j].getDepth() == depth and stack.elements[j].getType == 'MAX':
+                    if stack.elements[j].getUtility() >  stack.elements[j].getParent().getUtility():
+                        stack.getParent().setUtility(stack.elements[i].getUtility)
+            elif stack.elements[j].getDepth() == depth and stack.elements[j].getType == 'MIN':
+                if stack.elements[j].getUtility() <  stack.elements[j].getParent().getUtility():
+                        stack.getParent().setUtility(stack.elements[i].getUtility)
 
 def createTree(depth):
     actualDepth=0
     minmaxTree = Stack()
     minmaxTree.push(Node(initStatus(), None, 2, 0, "xd"))
     print(minmaxTree.peek().getStatus()[0])
-    #print("Nodos de profundidad 0: 1")
+    print("Nodos de profundidad 0: 1")
     while True:
         counter = 0
         actualDepth=actualDepth+1
-        for i in range (len(minmaxTree.elements)):
+        for i in range (minmaxTree.length()):
             if(not minmaxTree.elements[i].getExpanded()):
                 n=minmaxTree.elements[i]
                 createdNodes = expandNode(n)
@@ -220,14 +229,16 @@ def createTree(depth):
                         minmaxTree.push(createdNodes[j])
                 
                 minmaxTree.elements[i].setExpanded(True)
-        #print("Nodos de profundidad "+ str(actualDepth)+": "+str(counter))
+        print("Nodos de profundidad "+ str(actualDepth)+": "+str(counter))
         if(actualDepth==depth):
             minmaxTree=deepestNodeUtility(minmaxTree, depth)
             break
     return minmaxTree
 
-# prueba=createTree(2)
-# print(len(prueba.elements))
+prueba=createTree(2)
+print(len(prueba.elements))
+print(prueba)
+#utilidad(prueba)
 # print(prueba.peek().getUtility())
 # auxStatus=[environment,0,0]
 # print(movePlayer(1, 0, auxStatus))
