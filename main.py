@@ -1,5 +1,6 @@
 import re
 from shutil import move
+from xml.dom.minidom import Element
 import numpy as np
 from board import board
 from stack import Stack
@@ -200,7 +201,7 @@ def goalNode(node):
     return goal
 
 def utility(stack):
-    auxStack=stack
+    auxStack = stack
     flag = True
     while flag:
         for i in range(len(auxStack.elements)):
@@ -246,28 +247,36 @@ def utility(stack):
 
 def deleteDepth(stack):
     newStack= Stack()
+    #maxDepth=getMaxDepth(stack)
     for i in range(len(stack.elements)):
         maxDepth=getMaxDepth(stack)
         if stack.elements[i].getDepth() != maxDepth:
             newStack.push(stack.elements[i])
-    return newStack
+    return newStack 
 
 def getMaxDepth(stack):
-    maxDepth=-1
+    return stack.elements[-1].getDepth()
+    """ maxDepth=-1
     for i in range(len(stack.elements)):
         auxDepth=stack.elements[i].getDepth()
         maxDepth=max(auxDepth, maxDepth)
-    return maxDepth
+    return maxDepth """
+
+def getDepths(stack):
+    depths = []
+    for i in range(len(stack.elements)):
+            depths.append(stack.elements[i].getDepth())
+    return depths
 
 def createTree(depth, root):
-    actualDepth=0
+    currentDepth=0
     minmaxTree = Stack()
     minmaxTree.push(root)
     #print(minmaxTree.peek().getStatus()[0])
     #print("Nodos de profundidad 0: 1")
     while True:
         counter = 0
-        actualDepth=actualDepth+1
+        currentDepth=currentDepth+1
         for i in range (minmaxTree.length()):
             if(not minmaxTree.elements[i].getExpanded()):
                 n=minmaxTree.elements[i]
@@ -275,20 +284,21 @@ def createTree(depth, root):
                 for j in range(0,8):
                     if not createdNodes[j] is None:
                         counter+=1
-                        # if actualDepth==3:
+                        # if currentDepth==3:
                         #     print(createdNodes[j].getStatus()[0])
                         minmaxTree.push(createdNodes[j])
                 
                 minmaxTree.elements[i].setExpanded(True)
-        #print("Nodos de profundidad "+ str(actualDepth)+": "+str(counter))
-        if(actualDepth==depth):
+        #print("Nodos de profundidad "+ str(currentDepth)+": "+str(counter))
+        if(currentDepth==depth):
             minmaxTree=deepestNodeUtility(minmaxTree, depth)
             break
     return minmaxTree
+    
 
-# prueba=createTree(2, Node(initStatus(), None, 2, 0, "xd", -1))
-# print(len(prueba.elements))
-# prueba = utility(prueba)
+prueba=createTree(6, Node(initStatus(), None, 2, 0, "xd", -1))
+print(getDepths(prueba))
+#prueba = utility(prueba)
 # print(prueba.elements[0].getOperator())
 #prueba=createTree(6, Node(movePlayer(2, prueba.elements[0].getOperator(), prueba.elements[0].getStatus()), None, 2, 0, "xd", -1))
 # print(len(prueba.elements))
