@@ -1,5 +1,6 @@
 import re
 from shutil import move
+from xml.etree.ElementPath import find
 import numpy as np
 from board import board
 from stack import Stack
@@ -174,14 +175,29 @@ def expandNode(node):
             children[i]=Node(movePlayer(actualPlayer, i, newStatus), node, nextPlayer, node.getDepth()+1, "xd", i)
     return children
 
+def distanceToObject(status):
+    cpuPos=findPlayer(2,status[0])
+    auxDis=999999
+    for i in range(len(status[0])):
+        for j in range(len(status[0][i])):
+            if(status[0][i][j]!=1 and status[0][i][j]!=2 and status[0][i][j]!=0):
+                newDis=manhattan(cpuPos[0], cpuPos[1], i, j)
+                auxDis=min(newDis, auxDis)
+    return auxDis
+def manhattan(x0,y0,x1,y1):
+    distance=abs(x1-x0)+abs(y1-y0)
+    return distance
+
 #Funcion para calcular la utilidad
 def deepestNodeUtility(stack, depth):
     for i in range (len(stack.elements)):
         if goalNode(stack.elements[i]):
-            stack.elements[i].setUtility(stack.elements[i].getStatus()[2])
+            #stack.elements[i].setUtility(stack.elements[i].getStatus()[2])#*1/distanceToObject(stack.elements[i].getStatus()))
+            stack.elements[i].setUtility(stack.elements[i].getStatus()[2]*1/distanceToObject(stack.elements[i].getStatus()))
         if stack.elements[i].getDepth()==depth:
             #print("El nodo a verificar tiene profundidad: "+str(stack.elements[i].getDepth()))
-            stack.elements[i].setUtility(stack.elements[i].getStatus()[2])
+            #stack.elements[i].setUtility(stack.elements[i].getStatus()[2])
+            stack.elements[i].setUtility(stack.elements[i].getStatus()[2]*1/distanceToObject(stack.elements[i].getStatus()))
     return stack
 
 #Funcion para ver si un nodo es meta
@@ -199,50 +215,44 @@ def goalNode(node):
         goal = True
     return goal
 
+def sorter(node):
+    return node.getDepth()
+
 def utility(stack):
     auxStack=stack
-    flag = True
-    while flag:
-        for i in range(len(auxStack.elements)):
-            maxDepth=getMaxDepth(auxStack)
-            if maxDepth==1:
-                if auxStack.elements[i].getDepth() == maxDepth:
-                    #print("Caso profundidad 1: Utilidad del nodo hijo: "+ str(auxStack.elements[i].getUtility())+", La utilidad del nodo padre es: "+str(auxStack.elements[i].getParent().getUtility()))
-                    if auxStack.elements[i].getParent().getType() == 'MAX':
-                        if auxStack.elements[i].getUtility() >  auxStack.elements[i].getParent().getUtility():
-                            auxStack.elements[i].getParent().setUtility(auxStack.elements[i].getUtility())
-                            #print("Se subió "+ str( auxStack.elements[i].getUtility() ))
-                            auxStack.elements[i].getParent().setOperator(auxStack.elements[i].getOperator())
+    auxStack.elements.sort(key=sorter)
+    maxDepth=getMaxDepth(auxStack)
+    for i in range (maxDepth, 0, -1):
+        print ("Profundidad: "+str(i))
+        for j in range(len(auxStack.elements)):
+            if i==1:
+
+                if auxStack.elements[j].getDepth() == 1:
+                    print("Caso profundidad 1: Utilidad del nodo hijo: "+ str(auxStack.elements[j].getUtility())+", La utilidad del nodo padre es: "+str(auxStack.elements[i].getParent().getUtility()))
+                    if auxStack.elements[j].getParent().getType() == 'MAX':
+                        if auxStack.elements[j].getUtility() >  auxStack.elements[j].getParent().getUtility():
+                            auxStack.elements[j].getParent().setUtility(auxStack.elements[j].getUtility())
+                            print("Se subió "+ str( auxStack.elements[j].getUtility() ))
+                            auxStack.elements[j].getParent().setOperator(auxStack.elements[j].getOperator())
                     else:
-                        if auxStack.elements[i].getUtility() <  auxStack.elements[i].getParent().getUtility():
-                            auxStack.elements[i].getParent().setUtility(auxStack.elements[i].getUtility())
-                            #print("Se subió "+ str( auxStack.elements[i].getUtility() ))
-                            auxStack.elements[i].getParent().setOperator(auxStack.elements[i].getOperator())
-            if auxStack.elements[i].getDepth() == maxDepth:
-                if auxStack.elements[i].getParent().getType() == 'MAX':
-                    #print("Utilidad del nodo hijo: "+ str(auxStack.elements[i].getUtility())+", La utilidad del nodo padre es: "+str(auxStack.elements[i].getParent().getUtility()))
-                    auxStack.elements[i].getParent().setUtility(max(auxStack.elements[i].getUtility(), auxStack.elements[i].getParent().getUtility()))
-                    #print("Se subió "+ str(max(auxStack.elements[i].getUtility(), auxStack.elements[i].getParent().getUtility())) )
+                        if auxStack.elements[j].getUtility() <  auxStack.elements[j].getParent().getUtility():
+                            auxStack.elements[j].getParent().setUtility(auxStack.elements[j].getUtility())
+                            print("Se subió "+ str( auxStack.elements[j].getUtility() ))
+                            auxStack.elements[j].getParent().setOperator(auxStack.elements[j].getOperator())
+
+
+            elif (j!=0 and auxStack.elements[j].getDepth() == i):
+                if auxStack.elements[j].getParent().getType() == 'MAX':
+                    print("Utilidad del nodo hijo: "+ str(auxStack.elements[j].getUtility())+", La utilidad del nodo padre es: "+str(auxStack.elements[j].getParent().getUtility()))
+                    auxStack.elements[j].getParent().setUtility(max(auxStack.elements[j].getUtility(), auxStack.elements[j].getParent().getUtility()))
+                    print("Se subió "+ str(max(auxStack.elements[j].getUtility(), auxStack.elements[j].getParent().getUtility())) )
                 else:
-                    #print("Utilidad del nodo hijo: "+ str(auxStack.elements[i].getUtility())+", La utilidad del nodo padre es: "+str(auxStack.elements[i].getParent().getUtility()))
-                    auxStack.elements[i].getParent().setUtility(min(auxStack.elements[i].getUtility(), auxStack.elements[i].getParent().getUtility()))
-                    #print("Se subió "+ str(min(auxStack.elements[i].getUtility(), auxStack.elements[i].getParent().getUtility())) )
-        if(getMaxDepth(auxStack)!=1):
-            auxStack=deleteDepth(auxStack)
-        else:
-            flag=False
+                    print("Utilidad del nodo hijo: "+ str(auxStack.elements[j].getUtility())+", La utilidad del nodo padre es: "+str(auxStack.elements[j].getParent().getUtility()))
+                    auxStack.elements[j].getParent().setUtility(min(auxStack.elements[j].getUtility(), auxStack.elements[j].getParent().getUtility()))
+                    print("Se subió "+ str(min(auxStack.elements[j].getUtility(), auxStack.elements[j].getParent().getUtility())) )
+    print("La utilidad calculada es de: "+ str(auxStack.elements[0].getUtility())+ ", el movimiento a realizar es: "+str(auxStack.elements[0].getOperator()))
     return auxStack
 
-
-    # for i in range(depth):
-    #     for j in range(len(stack.elements)):
-    #         depth = stack.getDepth()
-    #         if stack.elements[j].getDepth() == depth and stack.elements[j].getType == 'MAX':
-    #                 if stack.elements[j].getUtility() >  stack.elements[j].getParent().getUtility():
-    #                     stack.getParent().setUtility(stack.elements[i].getUtility)
-    #         elif stack.elements[j].getDepth() == depth and stack.elements[j].getType == 'MIN':
-    #             if stack.elements[j].getUtility() <  stack.elements[j].getParent().getUtility():
-    #                     stack.getParent().setUtility(stack.elements[i].getUtility)
 
 def deleteDepth(stack):
     newStack= Stack()
@@ -286,7 +296,16 @@ def createTree(depth, root):
             break
     return minmaxTree
 
-# prueba=createTree(2, Node(initStatus(), None, 2, 0, "xd", -1))
+
+# print(distanceToObject([np.array([  [0,0,0,0,0,0,0,0],
+#                                     [0,3,0,0,0,0,0,0],
+#                                     [3,0,0,0,0,0,0,0],
+#                                     [0,0,0,1,2,0,0,0],
+#                                     [3,0,0,0,0,0,0,0],
+#                                     [3,0,0,0,0,0,0,3],
+#                                     [0,4,3,0,0,0,0,0],
+#                                     [0,3,0,0,0,0,3,0]]), 0, 0]))
+# prueba=createTree(6, Node(initStatus(), None, 2, 0, "xd", -1))
 # print(len(prueba.elements))
 # prueba = utility(prueba)
 # print(prueba.elements[0].getOperator())

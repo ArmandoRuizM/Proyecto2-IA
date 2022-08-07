@@ -230,11 +230,9 @@ def game(difficulty):
     while running:
         listeners=drawBoard(gameBoard, status[0], ancho, alto, BLANCO, NEGRO, CAFE, status[1], status[2])
         if currentPlayer=="CPU": ##Juega la CPU
-            #time.sleep(3)
             tree=utility(tree)
             nextMove = tree.elements[0].getOperator()
             status=movePlayer(2, nextMove, status)
-            tree=createTree(diff, Node(movePlayer(2, nextMove, tree.elements[0].getStatus()), None, 2, 0, "xd", -1))
             currentPlayer="P1"
         else: ##Juega player1
             for evento in pygame.event.get():
@@ -248,6 +246,7 @@ def game(difficulty):
                     # do something with the clicked sprites...
                     for i in range(len(clicked_listeners)):
                         status=movePlayer(1 , clicked_listeners[i][0], status)
+                        listeners=drawBoard(gameBoard, status[0], ancho, alto, BLANCO, NEGRO, CAFE, status[1], status[2])
                         tree=createTree(diff, Node(status, None, 2, 0, "xd", -1))
                         currentPlayer="CPU"
         if(isThereAWinner(status)):
